@@ -18,7 +18,6 @@ public class LoginPresenter extends IDCardPresenter<LoginContract.View>
     LoginPresenter() {
     }
 
-
     @Override
     public void onLogin(String ip, String username, final String password) {
         NetApi.getInstance().setUrl(ip);

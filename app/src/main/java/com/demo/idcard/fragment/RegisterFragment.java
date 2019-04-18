@@ -2,6 +2,7 @@ package com.demo.idcard.fragment;
 
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.demo.idcard.contract.RegisterContract;
 import com.demo.idcard.presenter.RegisterPresenter;
@@ -43,17 +44,18 @@ public class RegisterFragment extends BaseFragment<RegisterPresenter>
         if (mPresenter != null) {
             mPresenter.onRegister(mNameEdit.getText().toString()
                     , mStartTimeEdit.getText().toString()
-                    , mEndTimeEdit.getText().toString());
+                    , mEndTimeEdit.getText().toString()
+                    , 2);
         }
     }
 
     @Override
     public void onRegisterSuccess() {
-
+        Toast.makeText(getContext(), "注册成功", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onRegisterFailed(String errorMessage) {
-
+        Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
     }
 }

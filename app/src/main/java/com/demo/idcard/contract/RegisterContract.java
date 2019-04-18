@@ -11,6 +11,6 @@ public interface RegisterContract {
     }
 
     interface Presenter extends BaseContract.Presenter<View> {
-        void onRegister(String username, String startTime, String endTime);
+        void onRegister(String username, String startTime, String endTime,int subjectType);
     }
 }

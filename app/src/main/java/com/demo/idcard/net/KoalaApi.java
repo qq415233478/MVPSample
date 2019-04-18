@@ -23,7 +23,8 @@ public interface KoalaApi {
     @POST("/subject")
     Observable<RegisterResponse> register(
             @Field("name") String name
-            , @Field("start_time") int startTime
-            , @Field("end_time") int endTime
+            , @Field("start_time") long startTime
+            , @Field("end_time") long endTime
+            , @Field("subject_type") int subjectType
     );
 }

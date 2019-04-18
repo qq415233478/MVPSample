@@ -7,6 +7,8 @@ import com.demo.idcard.net.response.PadLoginResponse;
 import com.demo.idcard.net.response.RegisterResponse;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -24,6 +26,7 @@ public class NetApi {
     private static volatile NetApi INSTANCE;
     private String mUrl = "http://127.0.0.1";
     private UrlInterceptor mUrlInterceptor;
+    private List<String> mCookies = new ArrayList<>();
 
     private NetApi() {
         mUrlInterceptor = new UrlInterceptor();
@@ -32,7 +35,11 @@ public class NetApi {
                 .readTimeout(20 * 1000, TimeUnit.MILLISECONDS)
                 .retryOnConnectionFailure(true)
                 .addInterceptor(mUrlInterceptor)
+                .addInterceptor(new SetCookiesIntercept())
+                .addInterceptor(new GetCookiesIntercept())
                 .build();
+
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(mUrl)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
@@ -55,7 +62,6 @@ public class NetApi {
         mUrlInterceptor.setNewBaseUrl(url);
     }
 
-
     public Observable<PadLoginResponse> padLogin(String username
             , String password
             , String pad_id
@@ -63,8 +69,37 @@ public class NetApi {
         return mApiService.padLogin(username, password, pad_id, device_type);
     }
 
-    public Observable<RegisterResponse> register(String name, int startTime, int endTime) {
-        return mApiService.register(name, startTime, endTime);
+    public Observable<RegisterResponse> register(String name, long startTime, long endTime, int subjectType) {
+        return mApiService.register(name, startTime, endTime, subjectType);
+    }
+
+    class SetCookiesIntercept implements Interceptor {
+        @NonNull
+        @Override
+        public Response intercept(@NonNull Chain chain) throws IOException {
+            Request original = chain.request();
+            Request.Builder builder = original.newBuilder();
+            builder.header("user-agent", "Koala Admin");
+
+            for (String cookie : mCookies) {
+                builder.header("Cookie", cookie);
+            }
+            builder.method(original.method(), original.body());
+            Request request = builder.build();
+            return chain.proceed(request);
+        }
+    }
+
+    class GetCookiesIntercept implements Interceptor {
+        @NonNull
+        @Override
+        public Response intercept(@NonNull Chain chain) throws IOException {
+            Response original = chain.proceed(chain.request());
+            if (!original.headers("Set-Cookie").isEmpty()) {
+                mCookies.addAll(original.headers("Set-Cookie"));
+            }
+            return original;
+        }
     }
 
     class UrlInterceptor implements Interceptor {
